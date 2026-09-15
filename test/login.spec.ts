@@ -5,29 +5,34 @@ test.describe('SauceDemo - Login', () => {
     await page.goto('https://www.saucedemo.com');
   });
 
-  test('login thành công với standard_user', async ({ page }) => {
-    // Nhập thông tin đăng nhập
+  // TC-1: Successful Login
+  test('TC-1: successful login with valid credentials', async ({ page }) => {
     await page.locator('[data-test="username"]').fill('standard_user');
     await page.locator('[data-test="password"]').fill('secret_sauce');
     await page.locator('[data-test="login-button"]').click();
 
-    // Sau khi login sẽ chuyển tới trang inventory
     await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-
-    // Kiểm tra trang inventory đã hiển thị đúng
     await expect(page.locator('.title')).toHaveText('Products');
     await expect(page.locator('[data-test="inventory-container"]')).toBeVisible();
   });
 
-  test('login thất bại với sai mật khẩu', async ({ page }) => {
+  // TC-2: Login with Invalid Credentials
+  test('TC-2: login fails with invalid credentials', async ({ page }) => {
     await page.locator('[data-test="username"]').fill('standard_user');
     await page.locator('[data-test="password"]').fill('wrong_password');
     await page.locator('[data-test="login-button"]').click();
 
-    // Vẫn ở trang login và hiển thị thông báo lỗi
     await expect(page).toHaveURL('https://www.saucedemo.com/');
     await expect(page.locator('[data-test="error"]')).toContainText(
       'Username and password do not match any user in this service'
     );
+  });
+
+  // TC-3: Login with Empty Fields
+  test('TC-3: login blocked when fields are empty', async ({ page }) => {
+    await page.locator('[data-test="login-button"]').click();
+
+    await expect(page).toHaveURL('https://www.saucedemo.com/');
+    await expect(page.locator('[data-test="error"]')).toContainText('Username is required');
   });
 });
